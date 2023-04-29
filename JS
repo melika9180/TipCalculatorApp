@@ -1,0 +1,88 @@
+// Define variables and select elements
+const billInput = document.getElementById("bill");
+const customTipInput = document.getElementById("custom-tip");
+const numPeopleInput = document.getElementById("people");
+const tipAmounts = document.querySelectorAll(".tip-amount");
+const resetButton = document.querySelector(".reset");
+const displayFields = document.querySelectorAll(".display-fields");
+
+// Initialize values
+let bill = 0;
+let customTip = 0;
+let numPeople = 1;
+
+// Add event listeners to input fields
+billInput.addEventListener("input", updateBill);
+customTipInput.addEventListener("input", updateCustomTip);
+numPeopleInput.addEventListener("input", updateNumPeople);
+resetButton.addEventListener("click", reset);
+
+// Update bill value and calculate results
+function updateBill(event) {
+  bill = parseFloat(event.target.value);
+  calculateResults();
+}
+
+// Update custom tip value and calculate results
+function updateCustomTip(event) {
+  customTip = parseFloat(event.target.value);
+  calculateResults();
+}
+
+// Update number of people and calculate results
+function updateNumPeople(event) {
+  numPeople = parseInt(event.target.value);
+  calculateResults();
+}
+
+// Calculate results and update display
+function calculateResults() {
+  let tipPercent = 0;
+  let totalTip = 0;
+  let totalAmount = 0;
+  let amountPerPerson = 0;
+
+  // Check if custom tip is selected and calculate tip percent
+  if (customTip > 0) {
+    tipPercent = customTip / 100;
+  } else {
+    tipAmounts.forEach((tipAmount) => {
+      if (tipAmount.classList.contains("active")) {
+        tipPercent = parseFloat(tipAmount.textContent) / 100;
+      }
+    });
+  }
+
+  // Calculate total tip, total amount, and amount per person
+  totalTip = bill * tipPercent;
+  totalAmount = bill + totalTip;
+  amountPerPerson = totalAmount / numPeople;
+
+  // Update display fields with calculated values
+  displayFields.forEach((displayField) => {
+    const labelHeader = displayField.querySelector(".label-header");
+    const labelP = displayField.querySelector(".label-p");
+    const result = displayField.querySelector(".result");
+
+    if (labelHeader.textContent === "Tip Amount") {
+      result.textContent = `$${totalTip.toFixed(2)}`;
+    } else if (labelHeader.textContent === "Total") {
+      result.textContent = `$${totalAmount.toFixed(2)}`;
+    } else if (labelHeader.textContent === "Tip Per Person") {
+      result.textContent = `$${(totalTip / numPeople).toFixed(2)}`;
+    } else if (labelHeader.textContent === "Total Per Person") {
+      result.textContent = `$${amountPerPerson.toFixed(2)}`;
+    }
+  });
+}
+
+// Reset all values and display fields
+function reset() {
+  billInput.value = "";
+  customTipInput.value = "";
+  numPeopleInput.value = "";
+  bill = 0;
+  customTip = 0;
+  numPeople = 1;
+  calculateResults();
+}
