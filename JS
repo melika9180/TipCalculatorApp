@@ -3,19 +3,16 @@ const billInput = document.getElementById("bill");
 const customTipInput = document.getElementById("custom-tip");
 const numPeopleInput = document.getElementById("people");
 const tipAmounts = document.querySelectorAll(".tip-amount");
-const resetButton = document.querySelector(".reset");
-const displayFields = document.querySelectorAll(".display-fields");
+
+const tipAmountDisplay = document.querySelector("#tip-amount-per-person span");
+const totalAmountDisplay = document.querySelector("#total-per-person span");
 
 // Initialize values
 let bill = 0;
 let customTip = 0;
 let numPeople = 1;
 
-// Add event listeners to input fields
-billInput.addEventListener("input", updateBill);
-customTipInput.addEventListener("input", updateCustomTip);
-numPeopleInput.addEventListener("input", updateNumPeople);
-resetButton.addEventListener("click", reset);
+let activeButton = null; // Initialize the active button variable
 
 // Update bill value and calculate results
 function updateBill(event) {
@@ -35,54 +32,50 @@ function updateNumPeople(event) {
   calculateResults();
 }
 
-// Calculate results and update display
-function calculateResults() {
-  let tipPercent = 0;
-  let totalTip = 0;
-  let totalAmount = 0;
-  let amountPerPerson = 0;
+// Toggle active class on tip amount buttons
+function toggleActive(event) {
+  event.preventDefault();
+  const currentButton = event.currentTarget;
 
-  // Check if custom tip is selected and calculate tip percent
-  if (customTip > 0) {
-    tipPercent = customTip / 100;
-  } else {
-    tipAmounts.forEach((tipAmount) => {
-      if (tipAmount.classList.contains("active")) {
-        tipPercent = parseFloat(tipAmount.textContent) / 100;
-      }
-    });
+  if (activeButton) {
+    activeButton.classList.remove("active"); // Remove the active class from the previous button
   }
 
-  // Calculate total tip, total amount, and amount per person
-  totalTip = bill * tipPercent;
-  totalAmount = bill + totalTip;
-  amountPerPerson = totalAmount / numPeople;
+  currentButton.classList.add("active");
+  customTip = parseFloat(currentButton.dataset.tip);
 
-  // Update display fields with calculated values
-  displayFields.forEach((displayField) => {
-    const labelHeader = displayField.querySelector(".label-header");
-    const labelP = displayField.querySelector(".label-p");
-    const result = displayField.querySelector(".result");
-
-    if (labelHeader.textContent === "Tip Amount") {
-      result.textContent = `$${totalTip.toFixed(2)}`;
-    } else if (labelHeader.textContent === "Total") {
-      result.textContent = `$${totalAmount.toFixed(2)}`;
-    } else if (labelHeader.textContent === "Tip Per Person") {
-      result.textContent = `$${(totalTip / numPeople).toFixed(2)}`;
-    } else if (labelHeader.textContent === "Total Per Person") {
-      result.textContent = `$${amountPerPerson.toFixed(2)}`;
-    }
-  });
-}
-
-// Reset all values and display fields
-function reset() {
-  billInput.value = "";
-  customTipInput.value = "";
-  numPeopleInput.value = "";
-  bill = 0;
-  customTip = 0;
-  numPeople = 1;
+  customTipInput.value = ""; // Clear custom tip input
   calculateResults();
+
+  activeButton = currentButton; // Update the active button variable
 }
+
+// Add event listeners for tip amount buttons
+tipAmounts.forEach((tipAmount) => {
+  tipAmount.addEventListener("click", toggleActive);
+});
+
+// Add event listeners to input fields
+billInput.addEventListener("input", updateBill);
+customTipInput.addEventListener("input", updateCustomTip);
+numPeopleInput.addEventListener("input", updateNumPeople);
+
+// Add event listener for clicks on the custom tip input field
+customTipInput.addEventListener("click", () => {
+  tipAmounts.forEach((tipAmount) => {
+    tipAmount.classList.remove("active");
+  });
+});
+
+// Add event listener for clicks on the tip amount buttons
+tipAmounts.forEach((tipAmount) => {
+  tipAmount.addEventListener("click", (event) => {
+    const currentButton = event.currentTarget;
+    tipAmounts.forEach((tipAmount) => {
+      if (tipAmount !== currentButton) {
+        tipAmount.classList.remove("active");
+      }
+    });
+    activeButton = currentButton; // Update the active button variable
+  });
+});
